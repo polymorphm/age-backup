@@ -20,6 +20,9 @@ assert str is not bytes
 import argparse
 from .safe_print import safe_print as print
 
+DEFAULT_AGE_SIZE = 10
+DEFAULT_AGE_COUNT = 7
+
 class UserError(Exception):
     pass
 
@@ -28,7 +31,16 @@ def main():
         description='utility for periodical creating new '
                 '(and removing outdated) backup copies')
     
-    # TODO: parser.add_argument(...)
+    parser.add_argument('source',
+            help='source directory')
+    parser.add_argument('backup',
+            help='destination backup directory')
+    parser.add_argument('age-size', type=int, nargs='?',
+            help='how much backup-copies of one age. default is {}'.format(
+            DEFAULT_AGE_SIZE))
+    parser.add_argument('age-count', type=int, nargs='?',
+            help='how much ages. default is {}'.format(
+            DEFAULT_AGE_COUNT))
     
     args = parser.parse_args()
     
