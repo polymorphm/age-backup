@@ -1,7 +1,8 @@
 age-backup
-==================
+==========
 
-`age-backup` if utility for periodical creating new (and removing outdated) backup copies
+`age-backup` is simple utility for periodical creating new (and removing
+outdated) backup copies
 
 Status
 ------
