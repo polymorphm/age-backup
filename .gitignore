@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+*.pyo
+site-packages/*
+!site-packages/.keep
+test-site/*
+!test-site/.keep
