@@ -17,7 +17,7 @@
 
 assert str is not bytes
 
-import argparse
+import sys, functools, argparse
 from .safe_print import safe_print as print
 
 DEFAULT_AGE_SIZE = 10
@@ -26,22 +26,49 @@ DEFAULT_AGE_COUNT = 7
 class UserError(Exception):
     pass
 
+def user_error_showing(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except UserError as e:
+            print('user error: {}'.format(e), file=sys.stderr)
+    
+    return wrapper
+
+def show_user_error(s):
+    raise UserError(s)
+
+@user_error_showing
 def main():
     parser = argparse.ArgumentParser(
         description='utility for periodical creating new '
                 '(and removing outdated) backup copies')
     
-    parser.add_argument('source',
+    parser.add_argument('source', metavar='SOURCE',
             help='source directory')
-    parser.add_argument('backup',
+    parser.add_argument('backup', metavar='BACKUP',
             help='destination backup directory')
-    parser.add_argument('age-size', type=int, nargs='?',
+    parser.add_argument('age_size', metavar='AGE-SIZE',
+            type=int, nargs='?',
             help='how much backup-copies of one age. default is {}'.format(
             DEFAULT_AGE_SIZE))
-    parser.add_argument('age-count', type=int, nargs='?',
+    parser.add_argument('age_count', metavar='AGE-COUNT',
+            type=int, nargs='?',
             help='how much ages. default is {}'.format(
             DEFAULT_AGE_COUNT))
     
     args = parser.parse_args()
+    
+    if args.age_size is None:
+        args.age_size = DEFAULT_AGE_SIZE
+    if args.age_count is None:
+        args.age_count = DEFAULT_AGE_COUNT
+    
+    if args.age_size < 1:
+        show_user_error('invalid age size')
+    
+    if args.age_count < 1:
+        show_user_error('invalid age count')
     
     # TODO: ...
