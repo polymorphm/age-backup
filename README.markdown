@@ -7,4 +7,4 @@ outdated) backup copies
 Status
 ------
 
-the current status of the project (this branch) -- is `Developing`
+the current status of the project (this branch) -- is `Beta`
