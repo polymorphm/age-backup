@@ -17,7 +17,7 @@
 
 assert str is not bytes
 
-import sys, functools, argparse, re, os, shutil
+import sys, functools, argparse, re, time, random, os, os.path, shutil
 from .safe_print import safe_print as print
 
 DEFAULT_AGE_SIZE = 10
@@ -58,8 +58,22 @@ def get_backup_group_map(backup_path):
     
     return backup_group_map
 
+def gen_age_backup_name(basename, age):
+    return '{}.age-{}.backup'.format(basename, age)
+
+def gen_new_backup_name(basename, age=None):
+    t = time.strftime('%Y-%m-%d-%H-%M-%S')
+    r = random.randrange(100000)
+    
+    return gen_age_backup_name('{}.{}-{}'.format(basename, t, r), 0)
+
 def do_backup_copy(source_path, backup_path):
-    pass # TODO: ...
+    dist = os.path.join(
+        backup_path,
+        gen_new_backup_name(os.path.basename(source_path)),
+        )
+    
+    shutil.copytree(source_path, dist)
 
 def do_age_action(backup_path, file_list, age, age_size):
     pass # TODO: ...
