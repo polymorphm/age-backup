@@ -39,16 +39,50 @@ def user_error_showing(func):
 def show_user_error(s):
     raise UserError(s)
 
+def get_backup_group_list(backup_path):
+    pass # TODO: ...
+
+def do_backup_copy(source_path, backup_path):
+    pass # TODO: ...
+
+def do_age_action(backup_path, backup_list, age_count, is_extra=None):
+    if is_extra is None:
+        is_extra = False
+    
+    pass # TODO: ...
+
+def age_backup(source_path, backup_path,
+        age_size=None, age_count=None):
+    if age_size is None:
+        age_size = DEFAULT_AGE_SIZE
+    if age_count is None:
+        age_count = DEFAULT_AGE_COUNT
+    
+    # stage 1: get current backup-groups status, and remember it
+    backup_group_list = get_backup_group_list(backup_path)
+    
+    # stage 2: do fresh backup copy
+    do_backup_copy(source_path, backup_path)
+    
+    # stage 3: do actions for changing backup-groups status
+    for age, backup_list in enumerate(backup_group_list):
+        if age < age_count:
+            is_extra = False
+        else:
+            is_extra = True
+        
+        do_age_action(backup_path, backup_list, age_count, is_extra=is_extra)
+
 @user_error_showing
 def main():
     parser = argparse.ArgumentParser(
         description='utility for periodical creating new '
                 '(and removing outdated) backup copies')
     
-    parser.add_argument('source', metavar='SOURCE',
-            help='source directory')
-    parser.add_argument('backup', metavar='BACKUP',
-            help='destination backup directory')
+    parser.add_argument('source_path', metavar='SOURCE-PATH',
+            help='path to source directory')
+    parser.add_argument('backup_path', metavar='BACKUP-PATH',
+            help='path to destination backup directory')
     parser.add_argument('age_size', metavar='AGE-SIZE',
             type=int, nargs='?',
             help='how much backup-copies of one age. default is {}'.format(
@@ -60,15 +94,15 @@ def main():
     
     args = parser.parse_args()
     
-    if args.age_size is None:
-        args.age_size = DEFAULT_AGE_SIZE
-    if args.age_count is None:
-        args.age_count = DEFAULT_AGE_COUNT
-    
-    if args.age_size < 1:
+    if args.age_size is not None and args.age_size < 1:
         show_user_error('invalid age size')
     
-    if args.age_count < 1:
+    if args.age_count is not None and args.age_count < 1:
         show_user_error('invalid age count')
     
-    # TODO: ...
+    age_backup(
+            args.source_path,
+            args.backup_path,
+            age_size=args.age_size,
+            age_count=args.age_count,
+            )
