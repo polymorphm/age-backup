@@ -17,7 +17,7 @@
 
 assert str is not bytes
 
-import sys, functools, argparse
+import sys, functools, argparse, re, os, shutil
 from .safe_print import safe_print as print
 
 DEFAULT_AGE_SIZE = 10
@@ -39,16 +39,29 @@ def user_error_showing(func):
 def show_user_error(s):
     raise UserError(s)
 
-def get_backup_group_list(backup_path):
-    pass # TODO: ...
+def get_backup_group_map(backup_path):
+    filename_list = os.listdir(backup_path)
+    backup_group_map = {}
+    
+    for filename in filename_list:
+        m = re.match(
+                r'(?P<basename>.+)?\.age\-(?P<age>\d+)\.backup$',
+                filename,
+                flags=re.S | re.M,
+                )
+        if m is None:
+            continue
+        
+        basename, age_str = m.group('basename', 'age')
+        age = int(age_str)
+        backup_group_map.setdefault(age, []).append((basename, filename))
+    
+    return backup_group_map
 
 def do_backup_copy(source_path, backup_path):
     pass # TODO: ...
 
-def do_age_action(backup_path, backup_list, age_count, is_extra=None):
-    if is_extra is None:
-        is_extra = False
-    
+def do_age_action(backup_path, file_list, age, age_size):
     pass # TODO: ...
 
 def age_backup(source_path, backup_path,
@@ -59,19 +72,20 @@ def age_backup(source_path, backup_path,
         age_count = DEFAULT_AGE_COUNT
     
     # stage 1: get current backup-groups status, and remember it
-    backup_group_list = get_backup_group_list(backup_path)
+    backup_group_map = get_backup_group_map(backup_path)
     
     # stage 2: do fresh backup copy
     do_backup_copy(source_path, backup_path)
     
     # stage 3: do actions for changing backup-groups status
-    for age, backup_list in enumerate(backup_group_list):
+    for age in sorted(backup_group_map):
+        file_list = backup_group_map[age]
         if age < age_count:
-            is_extra = False
+            use_age_size = age_size
         else:
-            is_extra = True
+            use_age_size = 0
         
-        do_age_action(backup_path, backup_list, age_size, is_extra=is_extra)
+        do_age_action(backup_path, file_list, age, use_age_size)
 
 @user_error_showing
 def main():
