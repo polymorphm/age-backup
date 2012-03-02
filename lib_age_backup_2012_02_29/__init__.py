@@ -71,7 +71,7 @@ def age_backup(source_path, backup_path,
         else:
             is_extra = True
         
-        do_age_action(backup_path, backup_list, age_count, is_extra=is_extra)
+        do_age_action(backup_path, backup_list, age_size, is_extra=is_extra)
 
 @user_error_showing
 def main():
