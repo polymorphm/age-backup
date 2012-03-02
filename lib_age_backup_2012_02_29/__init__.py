@@ -75,8 +75,53 @@ def do_backup_copy(source_path, backup_path):
     
     shutil.copytree(source_path, dist)
 
-def do_age_action(backup_path, file_list, age, age_size):
-    pass # TODO: ...
+def do_age_action(backup_path, file_list, age, age_size, age_count):
+    if len(file_list) > age_size or age >= age_count:
+        # too much files of this age
+        #       or unwanted age
+        
+        action_count = 2
+    elif len(file_list) == age_size:
+        # normal count of files. saving balance
+        
+        action_count = 1
+    else:
+        # nothing to do
+        
+        return
+    
+    if age >= age_count - 1:
+        # old age
+        
+        use_delete = True
+    else:
+        # young or medium age
+        
+        use_delete = False
+    
+    file_list = list(file_list) # copy list for deleting items
+    
+    for i_action_count in range(action_count):
+        if not file_list:
+            break
+        
+        basename, filename = file_list.pop(random.randrange(len(file_list)))
+        file_path = os.path.join(backup_path, filename)
+        
+        if use_delete:
+            # deleting backup file. file is outdated or unwanted
+            
+            shutil.rmtree(file_path)
+        else:
+            # increasing age
+            
+            new_age = age + 1
+            new_file_path = os.path.join(
+                    backup_path,
+                    gen_age_backup_name(basename, new_age)
+                    )
+            
+            shutil.move(file_path, new_file_path)
 
 def age_backup(source_path, backup_path,
         age_size=None, age_count=None):
@@ -94,12 +139,8 @@ def age_backup(source_path, backup_path,
     # stage 3: do actions for changing backup-groups status
     for age in sorted(backup_group_map):
         file_list = backup_group_map[age]
-        if age < age_count:
-            use_age_size = age_size
-        else:
-            use_age_size = 0
         
-        do_age_action(backup_path, file_list, age, use_age_size)
+        do_age_action(backup_path, file_list, age, age_size, age_count)
 
 @user_error_showing
 def main():
