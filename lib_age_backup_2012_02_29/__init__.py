@@ -73,7 +73,15 @@ def do_backup_copy(source_path, backup_path):
         gen_new_backup_name(os.path.basename(source_path)),
         )
     
-    shutil.copytree(source_path, dist)
+    copy_ok = False
+    try:
+        shutil.copytree(source_path, dist)
+        copy_ok = True
+    finally:
+        # all or nothing
+        
+        if not copy_ok:
+            shutil.rmtree(dist, ignore_errors=True)
 
 def do_age_action(backup_path, file_list, age, age_size, age_count):
     if len(file_list) > age_size or age >= age_count:
